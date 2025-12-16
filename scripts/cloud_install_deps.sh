@@ -1,6 +1,6 @@
 set -e
 
-ENV_FILE=".env"
+ENV_FILE="$(dirname "$0")/../.env"
 
 if [ -f "$ENV_FILE" ]; then
     CLOUD_DEPS=$(grep '^CLOUD_DEPENDENCIES' "$ENV_FILE$" | cut -d= -f2 | tr -d ' ')
