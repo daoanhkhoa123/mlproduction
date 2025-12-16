@@ -6,6 +6,8 @@ from typing import List
 _ENV_DIR = Path(__file__).parent
 _ENV_FILE_ENCODING = "utf-8"
 
+print("checking files inside", _ENV_DIR)
+
 class SecretKeys(BaseSettings):
     data_link: str  
     ngrok_token: str
