@@ -4,7 +4,7 @@ ENV_FILE="$(cd "$(dirname "$0")/.." && pwd)/.env"
 echo "$ENV_FILE"
 
 if [ -f "$ENV_FILE" ]; then
-    CLOUD_DEPS=$(grep '^CLOUD_DEPENDENCIES' "$ENV_FILE$" | cut -d= -f2 | tr -d ' ')
+    CLOUD_DEPS=$(grep '^CLOUD_DEPENDENCIES' "$ENV_FILE" | cut -d= -f2 | tr -d ' ')
 
 else
     echo ".env file not found!"
