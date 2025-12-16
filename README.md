@@ -45,7 +45,6 @@ platform.system()
 
 **NOTE**: Because of this, any linux system will automatically install gpu versions! Check torch index in `pyproject.toml` before running `uv sync`
 
-
 # Technicals
 
 - PyLighting, Pytorch for models and training
