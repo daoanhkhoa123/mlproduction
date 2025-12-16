@@ -20,7 +20,7 @@ class CloudSetting(BaseSettings):
     cloud_dependencies: List[str]
     
     model_config = SettingsConfigDict(
-        env_file=_ENV_DIR / ".key",
+        env_file=_ENV_DIR / ".env",
         env_file_encoding=_ENV_FILE_ENCODING,
         extra="ignore"
     )
