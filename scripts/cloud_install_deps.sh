@@ -1,6 +1,6 @@
 set -e
 
-ENV_FILE="$(dirname "$0")/../.env"
+ENV_FILE="$(cd "$(dirname "$0")/.." && pwd)/.env"
 echo "$ENV_FILE"
 
 if [ -f "$ENV_FILE" ]; then
