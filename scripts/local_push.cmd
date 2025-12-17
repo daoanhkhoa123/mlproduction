@@ -1,6 +1,5 @@
 @REM Prepare to push
-uv export --format requirements.txt --no-hashes > requirements.txt
-
+uv pip compile pyproject.toml -o requirements.txt
 
 @REM Push
 git commit -m "message"
