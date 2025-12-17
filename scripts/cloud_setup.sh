@@ -43,40 +43,27 @@ echo "Kernel registered successfully"
 echo "Available kernels:"
 jupyter kernelspec list
 
-# Activate kernel
-KERNEL_NAME="mlproduction"
-DISPLAY_NAME="Python (mlproduction)"
+# Path environment fix
 
-uv run python - <<'EOF'
-import json
-import glob
-from pathlib import Path
+KERNEL_DIR="$(jupyter kernelspec list --json | python -c "
+import json,sys
+data=json.load(sys.stdin)
+print(data['kernelspecs']['mlproduction']['resource_dir'])
+")"
 
-KERNEL_NAME = "mlproduction"
-DISPLAY_NAME = "Python (mlproduction)"
-
-for nb in glob.glob("**/*.ipynb", recursive=True):
-    if ".ipynb_checkpoints" in nb:
-        continue
-
-    path = Path(nb)
-
-    try:
-        with path.open("r", encoding="utf-8") as f:
-            data = json.load(f)
-    except Exception:
-        continue
-
-    metadata = data.setdefault("metadata", {})
-
-    metadata["kernelspec"] = {
-        "name": KERNEL_NAME,
-        "display_name": DISPLAY_NAME,
-        "language": "python",
-    }
-
-    metadata.setdefault("language_info", {"name": "python"})
-
-    with path.open("w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+cat > "$KERNEL_DIR/kernel.json" <<EOF
+{
+  "argv": [
+    "$(pwd)/.venv/bin/python",
+    "-m",
+    "ipykernel_launcher",
+    "-f",
+    "{connection_file}"
+  ],
+  "display_name": "Python (mlproduction)",
+  "language": "python",
+  "env": {
+    "PATH": "$(pwd)/.venv/bin:\${PATH}"
+  }
+}
 EOF
