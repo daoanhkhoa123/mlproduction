@@ -18,9 +18,8 @@ IFS=',' read -ra DEP_ARRAY <<< "$CLOUD_DEPS"
 DEPS=""
 for dep in "${DEP_ARRAY[@]}"; do
     dep=$(echo "$dep" | xargs)
-    DEPS="$DEPS $dep"
-done
+    [ -z "$dep" ] && continue
 
-CMD="uv add $DEPS"
-echo "Running: $CMD"
-$CMD
+    echo "Runing: uv add $dep"
+    uv add $dep
+done
