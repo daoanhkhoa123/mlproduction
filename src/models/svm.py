@@ -1,7 +1,11 @@
-import transformers
-
 import re
-from collections import  Counter
+from collections import Counter
+from typing import Callable, Optional
+
+import torch
+# NOTE: this will be downloaded in runtime by cloud, i do not want to explode my computer
+from sentence_transformers import SentenceTransformer  # type: ignore
+
 
 def remove_common_words_with_counting(text1, text2):
     word1  = re.findall(r"\w+", text1)
@@ -33,14 +37,14 @@ def remove_common_words_with_counting(text1, text2):
 
 
 class Preprop:
-    def __init__(self, prepropfn:Callable, aggfn:Callable|None=None, encoder_name="bkai-foundation-models/vietnamese-bi-encoder", device=None) -> None:
+    def __init__(self, prepropfn:Callable, aggfn:Optional[Callable]=None, encoder_name="bkai-foundation-models/vietnamese-bi-encoder", device=None) -> None:
         self.prepropfn = prepropfn
         self.aggfn = aggfn if aggfn is not None else lambda x,y : (x,y)
 
         if device is None:
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
-        self.encoder = SentenceTransformer(encoder_name, device=self.device)
+        self.encoder = SentenceTransformer(encoder_name, device=self.device) # type: ignore
 
     def __call__(self, text1, text2, batch_size, verbose = True):
         t1, t2 = self.prepropfn(text1,text2)
@@ -53,5 +57,3 @@ class Preprop:
         v1 =  self.encoder.encode(t1, batch_size=batch_size, convert_to_numpy=True, show_progress_bar=verbose)
         v2 =  self.encoder.encode(t2, batch_size=batch_size, convert_to_numpy=True, show_progress_bar=verbose)
         return self.aggfn(v1,v2)
-
-class 
