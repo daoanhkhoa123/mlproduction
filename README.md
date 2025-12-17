@@ -66,6 +66,10 @@ platform.system()
 
 Stores private information such as token, dataset links
 
+## .env
+
+Some environment configurations, such as additional dependencies for cloud
+
 ## /runtime
 
 Ipynb notebooks that is run on cloud
@@ -75,7 +79,7 @@ Ipynb notebooks that is run on cloud
 Scripts for faster setup in new envinronment, usually do:
 
 - Pull codes from github publicly
-- Update postgre database
+- Sync dependencies
 - Save model registry file for permanent usage
 
 **Note**: Dataset downloaded by hand

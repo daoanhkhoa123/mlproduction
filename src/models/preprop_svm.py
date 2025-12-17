@@ -7,7 +7,7 @@ import torch
 from sentence_transformers import SentenceTransformer  # type: ignore
 
 
-def remove_common_words_with_counting(text1, text2):
+def prep_remove_common_words_with_counting(text1, text2):
     word1  = re.findall(r"\w+", text1)
     word2 = re.findall(r"\w+",text2)
 
@@ -35,6 +35,8 @@ def remove_common_words_with_counting(text1, text2):
 
     return " ".join(clean1), " ".join(clean2)
 
+def agg_differential(x,y):
+    return x-y
 
 class Preprop:
     def __init__(self, prepropfn:Callable, aggfn:Optional[Callable]=None, encoder_name="bkai-foundation-models/vietnamese-bi-encoder", device=None) -> None:

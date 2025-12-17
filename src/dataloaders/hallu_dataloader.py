@@ -48,37 +48,36 @@ class TextPairDataModule(pl.LightningDataModule):
     def __init__(
         self,
         train_df: pd.DataFrame, val_df: pd.DataFrame, 
-        tokenizer: PreTrainedTokenizerBase,
+        tokenizer: PreTrainedTokenizerBase, label_encoder:LabelEncoder,
         batch_size: int = 8, max_length: int = 512, num_workers: int = 4) -> None:
         super().__init__()
 
         self.train_df = train_df
         self.val_df = val_df
         self.tokenizer = tokenizer
+        self.le=label_encoder
         self.batch_size = batch_size
         self.max_length = max_length
         self.num_workers = num_workers
 
-        self.label_encoder: Optional[LabelEncoder] = None
         self.train_ds: Optional[Dataset] = None
         self.val_ds: Optional[Dataset] = None
 
     def setup(self, stage: Optional[str] = None) -> None:
-        self.label_encoder = LabelEncoder()
-        self.train_df["label_id"] = self.label_encoder.fit_transform(self.train_df["label"])
-        self.val_df["label_id"] = self.label_encoder.transform(self.val_df["label"])
+        self.train_df["label_id"] = self.le.transform(self.train_df["label"])
+        self.val_df["label_id"] = self.le.transform(self.val_df["label"])
 
         self.train_ds = TextPairDataset(
             self.train_df,
             self.tokenizer,
-            self.label_encoder,
+            self.le,
             self.max_length,
         )
 
         self.val_ds = TextPairDataset(
             self.val_df,
             self.tokenizer,
-            self.label_encoder,
+            self.le,
             self.max_length,
         )
 

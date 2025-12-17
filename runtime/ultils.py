@@ -2,6 +2,7 @@ import getpass
 import subprocess
 from typing import Callable
 
+
 def getpass_deco(message:str=""):
     def wrapper(fn:Callable):
         def fn2(*args, **kwargs):
