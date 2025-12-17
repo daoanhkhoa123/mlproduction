@@ -1,6 +1,5 @@
 import getpass
-# NOTE: will be installed in cloud runtime
-import gdown # type: ignore
+import subprocess
 from typing import Callable
 
 def getpass_deco(message:str=""):
@@ -16,8 +15,8 @@ def getpass_deco(message:str=""):
 def gdown_folder(link:str):
     try:
         # gdown can handle both file IDs and full links
-        file_path = gdown.download_folder(link)
-        return file_path
-    except Exception as e:
+        subprocess.run(["gdown", "--folder", link], check=True)
+        print("Folder downloaded successfully.")
+    except subprocess.CalledProcessError as e:
         print(f"Download failed: {e}")
         return None
