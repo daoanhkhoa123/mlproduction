@@ -42,7 +42,7 @@ def train_test_split_df(df: pd.DataFrame, target_col: str, label_encoder:Optiona
 
         print("\nSample rows from X_train:")
         print(X_train.head(2))   
-        print("\nSample values from y_train:", y_train.head(2).tolist())
+        print("\nSample values from y_train:", y_train[:2])
 
     return X_train, X_test, y_train, y_test
 
