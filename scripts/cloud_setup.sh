@@ -1,7 +1,11 @@
 set -e
 
+# Install uv and sync basic dependencies
+
 pip install --upgrade uv
 uv sync
+
+# Install optional dependencies
 
 ENV_FILE="$(cd "$(dirname "$0")/.." && pwd)/.env"
 echo "ENV_FILE=$ENV_FILE"
@@ -22,3 +26,19 @@ for dep in "${DEP_ARRAY[@]}"; do
     echo "Runing: uv add $dep"
     uv add $dep
 done
+
+# Set up custom ipynb kernel
+
+PROJECT_NAME="mlproduction"
+VENV_DIR=".venv"
+KERNEL_NAME="mlproduction"
+DISPLAY_NAME="Python (mlproduction)"
+
+uv run python -m ipykernel install \
+    --user \
+    --name "${KERNEL_NAME}" \
+    --display-name "${DISPLAY_NAME}"
+
+echo "Kernel registered successfully"
+echo "Available kernels:"
+jupyter kernelspec list
