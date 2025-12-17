@@ -1,10 +1,14 @@
+from typing import Optional
+
+import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-import numpy as np
-from typing import Optional
 
-def train_test_split_df(df: pd.DataFrame, target_col: str, label_encoder:Optional[LabelEncoder],test_size: float = 0.2, random_state: int = 42, stratify: bool = True):
+
+def train_test_split_df(df: pd.DataFrame, target_col: str, label_encoder:Optional[LabelEncoder], 
+                        test_size: float = 0.2, random_state: int = 42, stratify: bool = True,
+                        verbose=False):
     """
     Split a DataFrame into train and test sets.
 
@@ -29,6 +33,16 @@ def train_test_split_df(df: pd.DataFrame, target_col: str, label_encoder:Optiona
         random_state=random_state,
         stratify=stratify_arg
     )
+
+    if verbose:
+        print("X_train shape:", X_train.shape)
+        print("X_test shape:", X_test.shape)
+        print("y_train shape:", y_train.shape)
+        print("y_test shape:", y_test.shape)
+
+        print("\nSample rows from X_train:")
+        print(X_train.head(2))   
+        print("\nSample values from y_train:", y_train.head(2).tolist())
 
     return X_train, X_test, y_train, y_test
 
