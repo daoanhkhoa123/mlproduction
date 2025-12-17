@@ -3,7 +3,6 @@ from typing import Dict, Optional
 import pandas as pd
 import pytorch_lightning as pl
 import torch
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import DataLoader, Dataset
 from transformers import PreTrainedTokenizerBase
@@ -11,12 +10,10 @@ from transformers import PreTrainedTokenizerBase
 
 class TextPairDataset(Dataset):
     def __init__(
-        self,
-        df: pd.DataFrame,
-        tokenizer: PreTrainedTokenizerBase,
+        self, df: pd.DataFrame, tokenizer: PreTrainedTokenizerBase,
         label_encoder: LabelEncoder,
-        max_length: int = 512,
-    ) -> None:
+        max_length: int = 512) -> None:
+        
         self.df = df.reset_index(drop=True)
         self.tokenizer = tokenizer
         self.le = label_encoder
@@ -50,14 +47,13 @@ class TextPairDataset(Dataset):
 class TextPairDataModule(pl.LightningDataModule):
     def __init__(
         self,
-        df: pd.DataFrame,
+        train_df: pd.DataFrame, val_df: pd.DataFrame, 
         tokenizer: PreTrainedTokenizerBase,
-        batch_size: int = 8,
-        max_length: int = 512,
-        num_workers: int = 4,
-    ) -> None:
+        batch_size: int = 8, max_length: int = 512, num_workers: int = 4) -> None:
         super().__init__()
-        self.df = df
+
+        self.train_df = train_df
+        self.val_df = val_df
         self.tokenizer = tokenizer
         self.batch_size = batch_size
         self.max_length = max_length
@@ -69,24 +65,18 @@ class TextPairDataModule(pl.LightningDataModule):
 
     def setup(self, stage: Optional[str] = None) -> None:
         self.label_encoder = LabelEncoder()
-        self.df["label_id"] = self.label_encoder.fit_transform(self.df["label"])
-
-        train_df, val_df = train_test_split(
-            self.df,
-            test_size=0.1,
-            stratify=self.df["label"],
-            random_state=42,
-        )
+        self.train_df["label_id"] = self.label_encoder.fit_transform(self.train_df["label"])
+        self.val_df["label_id"] = self.label_encoder.transform(self.val_df["label"])
 
         self.train_ds = TextPairDataset(
-            train_df,
+            self.train_df,
             self.tokenizer,
             self.label_encoder,
             self.max_length,
         )
 
         self.val_ds = TextPairDataset(
-            val_df,
+            self.val_df,
             self.tokenizer,
             self.label_encoder,
             self.max_length,

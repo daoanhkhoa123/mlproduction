@@ -56,6 +56,10 @@ platform.system()
 - Ngrok for open tunnel
 - Collab and Kaggle for deployment
 
+# Models
+
+
+
 # File Structures
 
 ## .key
@@ -71,9 +75,10 @@ Ipynb notebooks that is run on cloud
 Scripts for faster setup in new envinronment, usually do:
 
 - Pull codes from github publicly
-- Download dataset
 - Update postgre database
 - Save model registry file for permanent usage
+
+**Note**: Dataset downloaded by hand
 
 ## /src
 
