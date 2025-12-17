@@ -12,11 +12,11 @@ def getpass_deco(message:str=""):
         
     return wrapper
 
-@getpass_deco("Type in the google drive link:")
-def gdown_manual(link:str):
+@getpass_deco("Type in the google drive folder link:")
+def gdown_folder(link:str):
     try:
         # gdown can handle both file IDs and full links
-        file_path = gdown.download(link)
+        file_path = gdown.download_folder(link)
         return file_path
     except Exception as e:
         print(f"Download failed: {e}")
