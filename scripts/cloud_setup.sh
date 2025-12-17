@@ -4,7 +4,6 @@ set -e
 
 pip install --upgrade uv
 uv pip compile pyproject.toml -o requirements.txt \
-  --index-url https://download.pytorch.org/whl/cu126 \
   --extra-index-url https://pypi.org/simple \
   --emit-index-url
 
