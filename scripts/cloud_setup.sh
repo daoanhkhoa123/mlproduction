@@ -1,5 +1,9 @@
 set -e
 
+# Install uv and basic dependencies
+
+pip install --upgrade uv
+uv pip compile pyproject.toml -o requirements.txt
 pip install -q -r requirements.txt
 
 # reading file
