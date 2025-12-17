@@ -27,6 +27,6 @@ DEPS=""
 for dep in "${DEP_ARRAY[@]}"; do
     dep=$(echo "$dep" | xargs)
 
-    echo "Runing: uv add --system $dep"
-    uv add --system $dep
+    echo "Runing: uv pip install --system $dep"
+    uv pip install --system $dep
 done
