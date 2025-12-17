@@ -42,3 +42,41 @@ uv run python -m ipykernel install \
 echo "Kernel registered successfully"
 echo "Available kernels:"
 jupyter kernelspec list
+
+# Activate kernel
+KERNEL_NAME="mlproduction"
+DISPLAY_NAME="Python (mlproduction)"
+
+uv run python - <<'EOF'
+import json
+import glob
+from pathlib import Path
+
+KERNEL_NAME = "mlproduction"
+DISPLAY_NAME = "Python (mlproduction)"
+
+for nb in glob.glob("**/*.ipynb", recursive=True):
+    if ".ipynb_checkpoints" in nb:
+        continue
+
+    path = Path(nb)
+
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        continue
+
+    metadata = data.setdefault("metadata", {})
+
+    metadata["kernelspec"] = {
+        "name": KERNEL_NAME,
+        "display_name": DISPLAY_NAME,
+        "language": "python",
+    }
+
+    metadata.setdefault("language_info", {"name": "python"})
+
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+EOF
