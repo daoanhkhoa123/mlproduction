@@ -25,7 +25,7 @@ IFS=',' read -ra DEP_ARRAY <<< "$CLOUD_DEPS"
 
 DEPS=""
 for dep in "${DEP_ARRAY[@]}"; do
-    dep = $(echo "$dep"| xargs)
+    dep=$(echo "$dep"| xargs)
 
     echo "Running: pip install $dep"
     pip install $dep
