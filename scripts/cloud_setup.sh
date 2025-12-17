@@ -1,6 +1,6 @@
 set -e
 
-pip install -r requirements.txt
+pip install -q -r requirements.txt
 
 # reading file
 ENV_FILE="$(cd "$(dirname "$0")/.." && pwd)/.env"
@@ -20,7 +20,7 @@ DEPS=""
 for dep in "${DEP_ARRAY[@]}"; do
     dep = $(echo "$dep"| xargs)
 
-    echo "Running: pip install $dep"
+    echo "Running: pip install -q $dep"
     pip install $dep
 
 done
