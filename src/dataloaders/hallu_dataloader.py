@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Callable, Iterable
+from typing import Dict, Optional, Union, Any, Iterable
 
 import pandas as pd
 import pytorch_lightning as pl
@@ -6,6 +6,9 @@ import torch
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import DataLoader, Dataset
 from transformers import PreTrainedTokenizerBase
+
+#NOTE: will be installed in cloud
+from datasets import Dataset # type: ignore
 
 
 class TextPairDataset(Dataset):
@@ -111,13 +114,30 @@ class HuggingFaceDataFrame:
             )
         
         self.df = df
+        self.dataset = Dataset.from_pandas(df, preserve_index=False)
     
     @classmethod
-    def from_df(cls, df:pd.DataFrame, concat_cols:Iterable[str], target_col:str):
+    def from_df(cls, df:pd.DataFrame, concat_cols:Iterable[str], target_col:str, le:Optional[LabelEncoder]=None):
         ds_df = pd.DataFrame()
         ds_df["text"] = df[list(concat_cols)].agg(lambda x: "[SEP] ".join(f"[{col.upper()}] {val}" 
                                                                     for col, val in zip(concat_cols, x)),
                                                                     axis=1)
-        ds_df["label"] = df[target_col]
+        ds_df = le.transform(df[target_col]) if le is not None else df[target_col]
         
         return cls(ds_df)
+
+    def train_test_split(self, *args, **kwargs):
+        dataset =  self.dataset.train_test_split(self.dataset, *args, **kwargs)
+        return dataset["train"], dataset["test"] # type: ignore
+
+    @staticmethod
+    def tokenize(dataset: Dataset, tokenizer: PreTrainedTokenizerBase,
+        padding: Union[bool, str] = "max_length", truncation: bool = True,
+        max_length: Optional[int] = None, batched: bool = True, **tokenizer_kwargs: Any) -> Dataset:
+        tokenizer_fn = lambda bacth : tokenizer(bacth["text"], padding=padding, 
+                                                truncation=truncation, max_length=max_length,
+                                                  **tokenizer_kwargs)
+        dataset = dataset.map(tokenizer_fn, batched=batched)
+        dataset.remove_columns(["text"])
+        dataset.set_format("torch")
+        return dataset
