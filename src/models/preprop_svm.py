@@ -2,6 +2,7 @@ import re
 from collections import Counter
 from typing import Callable, Optional
 
+import numpy as np
 import torch
 # NOTE: this will be downloaded in runtime by cloud, i do not want to explode my computer
 from sentence_transformers import SentenceTransformer  # type: ignore
@@ -34,6 +35,9 @@ def prep_remove_common_words_with_counting(text1, text2):
             clean2.append(w)
 
     return " ".join(clean1), " ".join(clean2)
+
+def agg_concatenate(x,y):
+    return np.concatenate((x,y), axis=1)
 
 def agg_differential(x,y):
     return x-y
