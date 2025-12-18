@@ -30,5 +30,3 @@ def ngrok_start(token:str, port:int=5000):
     
     except subprocess.CalledProcessError as e:
         print("Ngrok failed:" , e)
-
-        
