@@ -127,7 +127,7 @@ class HuggingFaceDataFrame:
         return cls(ds_df)
 
     def train_test_split(self, *args, **kwargs):
-        dataset =  self.dataset.train_test_split(self.dataset, *args, **kwargs)
+        dataset =  self.dataset.train_test_split(*args, **kwargs)
         return dataset["train"], dataset["test"] # type: ignore
 
     @staticmethod
