@@ -16,7 +16,9 @@ def getpass_deco(message:str=""):
 def gdown_folder(link:str):
     try:
         # gdown can handle both file IDs and full links
-        subprocess.run(["gdown", "--folder", link], check=True)
+        subprocess.run(["gdown", "--folder", link], check=True,
+                       stdout=subprocess.DEVNULL,
+                       stderr=subprocess.STDOUT)
         print("Folder downloaded successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Download failed: {e}")

@@ -122,7 +122,7 @@ class HuggingFaceDataFrame:
         ds_df["text"] = df[list(concat_cols)].agg(lambda x: "[SEP] ".join(f"[{col.upper()}] {val}" 
                                                                     for col, val in zip(concat_cols, x)),
                                                                     axis=1)
-        ds_df = le.transform(df[target_col]) if le is not None else df[target_col]
+        ds_df["label"] = le.transform(df[target_col]) if le is not None else df[target_col]
         
         return cls(ds_df)
 
