@@ -1,4 +1,5 @@
 # Load model directly
+from typing import Any
 from transformers import AutoModelForMaskedLM, AutoTokenizer
 
 tokenizer = AutoTokenizer.from_pretrained("vinai/phobert-base")
@@ -15,3 +16,12 @@ with torch.no_grad():
     output= model(**tokens)
 
 output["logits"].shape
+
+import lightning as lt
+
+class AttentionHallucination(lt.LightningModule):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__()
+
+        
+

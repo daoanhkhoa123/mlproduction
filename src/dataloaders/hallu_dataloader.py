@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Callable, Iterable
 
 import pandas as pd
 import pytorch_lightning as pl
@@ -100,3 +100,28 @@ class TextPairDataModule(pl.LightningDataModule):
             num_workers=self.num_workers,
             pin_memory=True,
         )
+
+
+class HuggingFaceDataFrame:
+    def __init__(self, df = None) -> None:
+        if df is None:
+            raise RuntimeError(
+                "Do not call HuggingFaceDataFrame() directly. "
+                "Use HuggingFaceDataFrame.from_df(...) instead."
+            )
+        
+        self._df = df
+    
+    @classmethod
+    def from_df(cls, df:pd.DataFrame, concat_cols:Iterable[str], target_col:str):
+        ds_df = pd.DataFrame()
+        ds_df["text"] = df[list(concat_cols)].agg(lambda x: "[SEP] ".join(f"[{col.upper()}] {val}" 
+                                                                    for col, val in zip(concat_cols, x)),
+                                                                    axis=1)
+        ds_df["label"] = df[target_col]
+        
+        return cls(ds_df)
+
+    @property
+    def df(self):
+        return self._df
