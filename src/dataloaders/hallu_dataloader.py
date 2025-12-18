@@ -110,7 +110,7 @@ class HuggingFaceDataFrame:
                 "Use HuggingFaceDataFrame.from_df(...) instead."
             )
         
-        self._df = df
+        self.df = df
     
     @classmethod
     def from_df(cls, df:pd.DataFrame, concat_cols:Iterable[str], target_col:str):
@@ -121,7 +121,3 @@ class HuggingFaceDataFrame:
         ds_df["label"] = df[target_col]
         
         return cls(ds_df)
-
-    @property
-    def df(self):
-        return self._df
