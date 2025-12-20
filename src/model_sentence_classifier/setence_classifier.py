@@ -10,7 +10,7 @@ class HalluSentenceClassifier(TextClassificationPipeline):
 
     def preprocess(self, inputs:Iterable[str], **tokenizer_kwargs) -> dict[str, list[Tensor] | Tensor | Any]:
         print("input got:", inputs)
-        input = self.concat_fn(*inputs)
+        input = self.concat_fn(inputs)
         return super().preprocess(input, **tokenizer_kwargs)
     
 def build_tokenizer_model(model_name:str, le:LabelEncoder, 
