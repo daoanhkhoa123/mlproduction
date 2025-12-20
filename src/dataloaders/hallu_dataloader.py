@@ -106,7 +106,7 @@ class TextPairDataModule(pl.LightningDataModule):
 
 
 class HuggingFaceDataFrame:
-    def __init__(self,*, df = None, concat_fn) -> None:
+    def __init__(self,*, df = None, concat_fn=None, n_inputs=None) -> None:
         if df is None:
             raise RuntimeError(
                 "Do not call HuggingFaceDataFrame() directly. "
@@ -116,17 +116,20 @@ class HuggingFaceDataFrame:
         self.df = df
         self.concat_fn = concat_fn
         self.dataset = Dataset.from_pandas(df, preserve_index=False)
+        self.n_inputs = n_inputs
     
     @classmethod
-    def from_df(cls, df:pd.DataFrame, concat_cols:Iterable[str], target_col:str, le:Optional[LabelEncoder]=None, concat_fn:Optional[Callable]=None):
+    def from_df(cls, df:pd.DataFrame, concat_cols:Iterable[str], target_col:str, le:Optional[LabelEncoder]=None):
         def concat_fn(*args:str):
+            assert len(args) == len(concat_cols),  # type: ignore
+            "Number of inputs has to be exactly same as dataset inititalization"
             return "[SEP] ".join(f"[{col.upper()}] {val}" for col, val in zip(concat_cols, args))
 
         ds_df = pd.DataFrame()
         ds_df["text"] = df[list(concat_cols)].agg(lambda row: concat_fn(*row), axis=1)
         ds_df["label"] = le.transform(df[target_col]) if le is not None else df[target_col]
         
-        return cls(df=ds_df, concat_fn=concat_fn)
+        return cls(df=ds_df, concat_fn=concat_fn, n_inputs = len(concat_cols)) # type: ignore
 
     def train_test_split(self, *args, **kwargs):
         dataset =  self.dataset.train_test_split(*args, **kwargs)
