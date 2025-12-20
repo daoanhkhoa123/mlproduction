@@ -122,7 +122,7 @@ class HuggingFaceDataFrame:
     @classmethod
     def from_df(cls, df:pd.DataFrame, concat_cols:Iterable[str], target_col:str, le:Optional[LabelEncoder]=None):
         def concat_fn(*args:str):
-            assert len(args) == len(concat_cols), "Number of inputs has to be exactly same as dataset inititalization"
+            assert len(args) == len(concat_cols), f"Number of inputs has to be exactly same as dataset inititalization. Got{len(args)} expected {len(concat_cols)}" # type: ignore
             return "[SEP] ".join(f"[{col.upper()}] {val}" for col, val in zip(concat_cols, args))
 
         ds_df = pd.DataFrame()
