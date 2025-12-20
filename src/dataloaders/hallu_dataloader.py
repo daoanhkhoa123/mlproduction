@@ -106,7 +106,7 @@ class TextPairDataModule(pl.LightningDataModule):
 
 
 class HuggingFaceDataFrame:
-    def __init__(self,*, df = None, concat_fn=None, n_inputs=None) -> None:
+    def __init__(self,*, df = None, input_columns:Iterable[str], concat_fn=None, n_inputs=None) -> None:
         if df is None:
             raise RuntimeError(
                 "Do not call HuggingFaceDataFrame() directly. "
@@ -116,6 +116,7 @@ class HuggingFaceDataFrame:
         self.df = df
         self.concat_fn = concat_fn
         self.dataset = Dataset.from_pandas(df, preserve_index=False)
+        self.input_columns = input_columns
         self.n_inputs = n_inputs
     
     @classmethod
@@ -129,7 +130,7 @@ class HuggingFaceDataFrame:
         ds_df["text"] = df[list(concat_cols)].agg(lambda row: concat_fn(*row), axis=1)
         ds_df["label"] = le.transform(df[target_col]) if le is not None else df[target_col]
         
-        return cls(df=ds_df, concat_fn=concat_fn, n_inputs = len(concat_cols)) # type: ignore
+        return cls(df=ds_df, input_columns=concat_cols, concat_fn=concat_fn, n_inputs = len(concat_cols)) # type: ignore
 
     def train_test_split(self, *args, **kwargs):
         dataset =  self.dataset.train_test_split(*args, **kwargs)
