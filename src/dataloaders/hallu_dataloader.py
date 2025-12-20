@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union, Any, Iterable
+from typing import Dict, Optional, Union, Any, Iterable, Callable
 
 import pandas as pd
 import pytorch_lightning as pl
@@ -106,7 +106,7 @@ class TextPairDataModule(pl.LightningDataModule):
 
 
 class HuggingFaceDataFrame:
-    def __init__(self, df = None) -> None:
+    def __init__(self,*, df = None, concat_fn) -> None:
         if df is None:
             raise RuntimeError(
                 "Do not call HuggingFaceDataFrame() directly. "
@@ -114,17 +114,19 @@ class HuggingFaceDataFrame:
             )
         
         self.df = df
+        self.concat_fn = concat_fn
         self.dataset = Dataset.from_pandas(df, preserve_index=False)
     
     @classmethod
-    def from_df(cls, df:pd.DataFrame, concat_cols:Iterable[str], target_col:str, le:Optional[LabelEncoder]=None):
+    def from_df(cls, df:pd.DataFrame, concat_cols:Iterable[str], target_col:str, le:Optional[LabelEncoder]=None, concat_fn:Optional[Callable]=None):
+        def concat_fn(*args:str):
+            return "[SEP] ".join(f"[{col.upper()}] {val}" for col, val in zip(concat_cols, args))
+
         ds_df = pd.DataFrame()
-        ds_df["text"] = df[list(concat_cols)].agg(lambda x: "[SEP] ".join(f"[{col.upper()}] {val}" 
-                                                                    for col, val in zip(concat_cols, x)),
-                                                                    axis=1)
+        ds_df["text"] = df[list(concat_cols)].agg(lambda row: concat_fn(*row), axis=1)
         ds_df["label"] = le.transform(df[target_col]) if le is not None else df[target_col]
         
-        return cls(ds_df)
+        return cls(df=ds_df, concat_fn=concat_fn)
 
     def train_test_split(self, *args, **kwargs):
         dataset =  self.dataset.train_test_split(*args, **kwargs)
