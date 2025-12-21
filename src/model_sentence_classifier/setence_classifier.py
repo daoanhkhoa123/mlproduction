@@ -9,12 +9,10 @@ class HalluSentenceClassifier(TextClassificationPipeline):
         self.concat_fn = concat_fn
 
     def preprocess(self, inputs:Iterable[str], **tokenizer_kwargs) -> dict[str, list[Tensor] | Tensor | Any]:
-        print("input got:", inputs)
         input = self.concat_fn(*inputs)
-        print("input after:", input)
         return super().preprocess(input, **tokenizer_kwargs)
     
-def build_tokenizer_model(model_name:str, le:LabelEncoder, 
+def build_tokenizer_model(model_name:str, le:LabelEncoder, hf_ds:HuggingFaceDataFrame,
                           tokenizer_kwargs=dict(), model_kwargs=dict()) -> Tuple[AutoTokenizer, AutoModelForSequenceClassification]:
     id2label = {i: label for i, label in enumerate(le.classes_)}
     label2id = {label: i for i, label in enumerate(le.classes_)}
@@ -25,6 +23,10 @@ def build_tokenizer_model(model_name:str, le:LabelEncoder,
         id2label=id2label, label2id=label2id,
         **model_kwargs)
 
+    special_tokens = {"additional_special_tokens": hf_ds.input_columns}
+    tokenizer.add_special_tokens(special_tokens)
+    print("Added token:", hf_ds.input_columns)
+    model.resize_token_embeddings(len(tokenizer))
     return tokenizer, model
 
 

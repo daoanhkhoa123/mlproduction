@@ -116,14 +116,14 @@ class HuggingFaceDataFrame:
         self.df = df
         self.concat_fn = concat_fn
         self.dataset = Dataset.from_pandas(df, preserve_index=False)
-        self.input_columns = input_columns
+        self.input_columns = [i.upper() for i in input_columns]
         self.n_inputs = n_inputs
     
     @classmethod
     def from_df(cls, df:pd.DataFrame, concat_cols:Iterable[str], target_col:str, le:Optional[LabelEncoder]=None):
         def concat_fn(*args:str):
             assert len(args) == len(concat_cols), f"Number of inputs has to be exactly same as dataset inititalization. Got {len(args)} expected {len(concat_cols)}" # type: ignore
-            return "[SEP] ".join(f"[{col.upper()}] {val}" for col, val in zip(concat_cols, args))
+            return " ".join(f"[{col.upper()}] {val}" for col, val in zip(concat_cols, args))
 
         ds_df = pd.DataFrame()
         ds_df["text"] = df[list(concat_cols)].agg(lambda row: concat_fn(*row), axis=1)
