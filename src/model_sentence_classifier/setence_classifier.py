@@ -24,7 +24,7 @@ def build_tokenizer_model(model_name:str, le:LabelEncoder, hf_ds:HuggingFaceData
         **model_kwargs)
 
 
-    special_tokens = {"additional_special_tokens": [AddedToken(ic, single_word=True, normalized=False) for ic in hf_ds.input_columns]}
+    special_tokens = {"additional_special_tokens": [AddedToken(f"[{ic}]", single_word=True, normalized=False) for ic in hf_ds.input_columns]}
     tokenizer.add_special_tokens(special_tokens)
     print("Added token:", special_tokens["additional_special_tokens"])
     model.resize_token_embeddings(len(tokenizer))
