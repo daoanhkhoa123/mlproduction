@@ -1,5 +1,5 @@
 from src.dataloaders.hallu_dataloader import HuggingFaceDataFrame
-from transformers import TextClassificationPipeline, Trainer, AutoTokenizer, AutoModelForSequenceClassification
+from transformers import TextClassificationPipeline, Trainer, AutoTokenizer, AutoModelForSequenceClassification, AddedToken
 from sklearn.preprocessing import LabelEncoder
 from torch  import Tensor
 from typing import Any, Iterable, Callable, Tuple
@@ -23,9 +23,10 @@ def build_tokenizer_model(model_name:str, le:LabelEncoder, hf_ds:HuggingFaceData
         id2label=id2label, label2id=label2id,
         **model_kwargs)
 
-    special_tokens = {"additional_special_tokens": hf_ds.input_columns}
+
+    special_tokens = {"additional_special_tokens": [AddedToken(ic, single_word=True, normalized=False) for ic in hf_ds.input_columns]}
     tokenizer.add_special_tokens(special_tokens)
-    print("Added token:", hf_ds.input_columns)
+    print("Added token:", special_tokens["additional_special_tokens"])
     model.resize_token_embeddings(len(tokenizer))
     return tokenizer, model
 
