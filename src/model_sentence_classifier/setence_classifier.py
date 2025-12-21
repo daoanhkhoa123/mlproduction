@@ -2,13 +2,17 @@ from src.dataloaders.hallu_dataloader import HuggingFaceDataFrame
 from transformers import TextClassificationPipeline, Trainer, AutoTokenizer, AutoModelForSequenceClassification, AddedToken
 from sklearn.preprocessing import LabelEncoder
 from torch  import Tensor
-from typing import Any, Iterable, Callable, Tuple
+from typing import Any, Iterable, Callable, Tuple, Optional
 
 class HalluSentenceClassifier(TextClassificationPipeline):
-    def set_concatfn(self, concat_fn:Callable):
+    def set_concatfn(self, concat_fn:Callable, preprocess_fn:Optional[Callable]=None):
         self.concat_fn = concat_fn
+        self.preprocess_fn = preprocess_fn
 
     def preprocess(self, inputs:Iterable[str], **tokenizer_kwargs) -> dict[str, list[Tensor] | Tensor | Any]:
+        if self.preprocess_fn:
+            inputs = [self.preprocess_fn(i) for i in inputs]
+
         input = self.concat_fn(*inputs)
         return super().preprocess(input, **tokenizer_kwargs)
     
@@ -31,12 +35,12 @@ def build_tokenizer_model(model_name:str, le:LabelEncoder, hf_ds:HuggingFaceData
     return tokenizer, model
 
 
-def build_pipeline(trainer:Trainer, hf_ds:HuggingFaceDataFrame, **kwargs) -> HalluSentenceClassifier:
+def build_pipeline(trainer:Trainer, hf_ds:HuggingFaceDataFrame,**kwargs) -> HalluSentenceClassifier:
     pipeline =  HalluSentenceClassifier(
         task="text-classification", 
         model=trainer.model, 
         tokenizer=trainer.tokenizer,
         **kwargs
     )
-    pipeline.set_concatfn(hf_ds.concat_fn) # type: ignore
+    pipeline.set_concatfn(hf_ds.concat_fn, hf_ds.preprocess_fn) # type: ignore
     return pipeline 

@@ -9,7 +9,7 @@ from transformers import PreTrainedTokenizerBase
 
 #NOTE: will be installed in cloud
 from datasets import Dataset # type: ignore
-
+from soe_vinorm import normalize_text # type: ignore
 
 class TextPairDataset(Dataset):
     def __init__(
@@ -106,7 +106,7 @@ class TextPairDataModule(pl.LightningDataModule):
 
 
 class HuggingFaceDataFrame:
-    def __init__(self,*, df = None, input_columns:Iterable[str], concat_fn=None, n_inputs=None) -> None:
+    def __init__(self,*, df = None, input_columns:Iterable[str], preprocess_fn:Optional[Callable]=None, concat_fn=None, n_inputs=None) -> None:
         if df is None:
             raise RuntimeError(
                 "Do not call HuggingFaceDataFrame() directly. "
@@ -115,21 +115,25 @@ class HuggingFaceDataFrame:
         
         self.df = df
         self.concat_fn = concat_fn
+        self.preprocess_fn=preprocess_fn
         self.dataset = Dataset.from_pandas(df, preserve_index=False)
         self.input_columns = [i.upper() for i in input_columns]
         self.n_inputs = n_inputs
     
     @classmethod
-    def from_df(cls, df:pd.DataFrame, concat_cols:Iterable[str], target_col:str, le:Optional[LabelEncoder]=None):
+    def from_df(cls, df:pd.DataFrame, concat_cols:Iterable[str], target_col:str, le:Optional[LabelEncoder]=None, preprocess_fn:Optional[Callable]=None):
+        if preprocess_fn is None:
+            preprocess_fn = normalize_text
+
         def concat_fn(*args:str):
             assert len(args) == len(concat_cols), f"Number of inputs has to be exactly same as dataset inititalization. Got {len(args)} expected {len(concat_cols)}" # type: ignore
-            return " ".join(f"[{col.upper()}] {val}" for col, val in zip(concat_cols, args))
+            return " ".join(f"[{col.upper()}] {preprocess_fn(val)}" for col, val in zip(concat_cols, args)) # type: ignore
 
         ds_df = pd.DataFrame()
         ds_df["text"] = df[list(concat_cols)].agg(lambda row: concat_fn(*row), axis=1)
         ds_df["label"] = le.transform(df[target_col]) if le is not None else df[target_col]
         
-        return cls(df=ds_df, input_columns=concat_cols, concat_fn=concat_fn, n_inputs = len(concat_cols)) # type: ignore
+        return cls(df=ds_df, input_columns=concat_cols, concat_fn=concat_fn, preprocess_fn=preprocess_fn, n_inputs = len(concat_cols)) # type: ignore
 
     def train_test_split(self, *args, **kwargs):
         dataset =  self.dataset.train_test_split(*args, **kwargs)
