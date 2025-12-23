@@ -10,7 +10,10 @@ from dataclasses import dataclass
 
 #NOTE: will be installed in cloud
 from datasets import Dataset # type: ignore
-from soe_vinorm import normalize_text # type: ignore
+# from soe_vinorm import normalize_text # type: ignore
+from vi_cleaner.vi_cleaner import ViCleaner # type: ignore
+
+normalize_text = ViCleaner().clean_text
 
 class TextPairDataset(Dataset):
     def __init__(
