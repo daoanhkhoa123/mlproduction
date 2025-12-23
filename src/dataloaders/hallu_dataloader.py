@@ -1,7 +1,7 @@
 from typing import Dict, Optional, Union, Any, Iterable, Callable
 
 import pandas as pd
-import pytorch_lightning as pl
+# import pytorch_lightning as pl
 import torch
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import DataLoader, Dataset
@@ -51,62 +51,62 @@ class TextPairDataset(Dataset):
         return item
 
 
-class TextPairDataModule(pl.LightningDataModule):
-    def __init__(
-        self,
-        train_df: pd.DataFrame, val_df: pd.DataFrame, 
-        tokenizer: PreTrainedTokenizerBase, label_encoder:LabelEncoder,
-        batch_size: int = 8, max_length: int = 512, num_workers: int = 4) -> None:
-        super().__init__()
+# class TextPairDataModule(pl.LightningDataModule):
+#     def __init__(
+#         self,
+#         train_df: pd.DataFrame, val_df: pd.DataFrame, 
+#         tokenizer: PreTrainedTokenizerBase, label_encoder:LabelEncoder,
+#         batch_size: int = 8, max_length: int = 512, num_workers: int = 4) -> None:
+#         super().__init__()
 
-        self.train_df = train_df
-        self.val_df = val_df
-        self.tokenizer = tokenizer
-        self.le=label_encoder
-        self.batch_size = batch_size
-        self.max_length = max_length
-        self.num_workers = num_workers
+#         self.train_df = train_df
+#         self.val_df = val_df
+#         self.tokenizer = tokenizer
+#         self.le=label_encoder
+#         self.batch_size = batch_size
+#         self.max_length = max_length
+#         self.num_workers = num_workers
 
-        self.train_ds: Optional[Dataset] = None
-        self.val_ds: Optional[Dataset] = None
+#         self.train_ds: Optional[Dataset] = None
+#         self.val_ds: Optional[Dataset] = None
 
-    def setup(self, stage: Optional[str] = None) -> None:
-        self.train_df["label_id"] = self.le.transform(self.train_df["label"])
-        self.val_df["label_id"] = self.le.transform(self.val_df["label"])
+#     def setup(self, stage: Optional[str] = None) -> None:
+#         self.train_df["label_id"] = self.le.transform(self.train_df["label"])
+#         self.val_df["label_id"] = self.le.transform(self.val_df["label"])
 
-        self.train_ds = TextPairDataset(
-            self.train_df,
-            self.tokenizer,
-            self.le,
-            self.max_length,
-        )
+#         self.train_ds = TextPairDataset(
+#             self.train_df,
+#             self.tokenizer,
+#             self.le,
+#             self.max_length,
+#         )
 
-        self.val_ds = TextPairDataset(
-            self.val_df,
-            self.tokenizer,
-            self.le,
-            self.max_length,
-        )
+#         self.val_ds = TextPairDataset(
+#             self.val_df,
+#             self.tokenizer,
+#             self.le,
+#             self.max_length,
+#         )
 
-    def train_dataloader(self) -> DataLoader:
-        assert self.train_ds is not None
-        return DataLoader(
-            self.train_ds,
-            batch_size=self.batch_size,
-            shuffle=True,
-            num_workers=self.num_workers,
-            pin_memory=True,
-        )
+#     def train_dataloader(self) -> DataLoader:
+#         assert self.train_ds is not None
+#         return DataLoader(
+#             self.train_ds,
+#             batch_size=self.batch_size,
+#             shuffle=True,
+#             num_workers=self.num_workers,
+#             pin_memory=True,
+#         )
 
-    def val_dataloader(self) -> DataLoader:
-        assert self.val_ds is not None
-        return DataLoader(
-            self.val_ds,
-            batch_size=self.batch_size,
-            shuffle=False,
-            num_workers=self.num_workers,
-            pin_memory=True,
-        )
+#     def val_dataloader(self) -> DataLoader:
+#         assert self.val_ds is not None
+#         return DataLoader(
+#             self.val_ds,
+#             batch_size=self.batch_size,
+#             shuffle=False,
+#             num_workers=self.num_workers,
+#             pin_memory=True,
+#         )
 
 
 class HuggingFaceDataFrame:
