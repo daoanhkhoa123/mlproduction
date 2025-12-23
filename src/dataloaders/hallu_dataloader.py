@@ -187,6 +187,7 @@ class HuggingDataframe2:
         dataset =  self.dataset.train_test_split(*args, **kwargs)
         return dataset["train"], dataset["test"] # type: ignore
 
+    @torch.no_grad()
     def tensorize_fn(self, x1:str, x2:str, tokenizer: PreTrainedTokenizerBase, model:AutoModel, **tokenizer_kwargs: Any):
         inps = tokenizer(x1, x2, padding=self.config.padding, truncation=self.config.truncation,
                     max_length=self.config.max_length, return_tensors="pt",**tokenizer_kwargs)
