@@ -5,7 +5,8 @@ import pytorch_lightning as pl
 import torch
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import DataLoader, Dataset
-from transformers import PreTrainedTokenizerBase
+from transformers import PreTrainedTokenizerBase, AutoModel
+from dataclasses import dataclass
 
 #NOTE: will be installed in cloud
 from datasets import Dataset # type: ignore
@@ -148,5 +149,52 @@ class HuggingFaceDataFrame:
                                                   **tokenizer_kwargs)
         dataset = dataset.map(tokenizer_fn, batched=batched)
         dataset.remove_columns(["text"])
+        dataset.set_format("torch")
+        return dataset
+
+
+@dataclass
+class HuggingDataframe2Config:
+    col1: str
+    col2: str
+    target_col:str
+    preprocess_fn: Callable = normalize_text
+
+    # tokenizer
+    padding :bool= True
+    truncation:bool = True
+    max_length: int = 512
+
+    
+class HuggingDataframe2:
+    def __init__(self, *, df:pd.DataFrame, config:HuggingDataframe2Config) -> None:
+        self.config = config
+        self.dataset = Dataset.from_pandas(df, preserve_index=False)
+
+    @classmethod
+    def from_df(cls, df:pd.DataFrame, config:HuggingDataframe2Config, *, le:Optional[LabelEncoder] =None):
+        ds_df = pd.DataFrame()
+        ds_df[config.col1] = df[config.col1].apply(config.preprocess_fn) # type: ignore
+        ds_df[config.col2] = df[config.col2].apply(config.preprocess_fn) # type: ignore
+        ds_df[config.target_col] = le.transform(df[config.target_col]) if le is not None else df[config.target_col]
+
+        return cls(df=df, config=config)
+
+    def train_test_split(self, *args, **kwargs):
+        dataset =  self.dataset.train_test_split(*args, **kwargs)
+        return dataset["train"], dataset["test"] # type: ignore
+
+    def tensorize_fn(self, x1:str, x2:str, tokenizer: PreTrainedTokenizerBase, model:AutoModel, **tokenizer_kwargs: Any):
+        inps = tokenizer([x1, x2], padding=self.config.padding, truncation=self.config.truncation,
+                    max_length=self.config.max_length, return_tensors="pt",**tokenizer_kwargs)
+        
+        return model(**inps).last_hidden_state # type: ignore
+
+    def tensorize(self, dataset: Dataset, tokenizer: PreTrainedTokenizerBase, model:AutoModel,
+        batched: bool = True, **tokenizer_kwargs: Any) -> Dataset: 
+
+        ts_fn = lambda batch: self.tensorize_fn(batch[self.config.col1], batch[self.config.col2], tokenizer, model, **tokenizer_kwargs)
+        dataset = dataset.map(ts_fn, batched=batched)    
+        dataset.remove_columns([self.config.col1, self.config.col2])
         dataset.set_format("torch")
         return dataset
