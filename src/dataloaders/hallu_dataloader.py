@@ -191,7 +191,7 @@ class HuggingDataframe2:
         inps = tokenizer(x1, x2, padding=self.config.padding, truncation=self.config.truncation,
                     max_length=self.config.max_length, return_tensors="pt",**tokenizer_kwargs)
         
-        return model(**inps).last_hidden_state # type: ignore
+        return model(**inps).last_hidden_state.cpu().numpy() # type: ignore
 
     def tensorize(self, dataset: Dataset, tokenizer: PreTrainedTokenizerBase, model:AutoModel,
         batched: bool = True, **tokenizer_kwargs: Any) -> Dataset: 
